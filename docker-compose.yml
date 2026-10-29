@@ -1,0 +1,58 @@
+# Tres microservicios independientes: cada uno con su imagen, su contenedor y su puerto.
+# Cada servicio se puede detener o reiniciar sin tocar a los demás (docker compose stop productos).
+name: tienda-microservicios
+
+x-comun: &comun
+  restart: unless-stopped
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  networks: [interna]
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50"
+        memory: 256M
+
+services:
+  productos:
+    <<: *comun
+    build:
+      context: .
+      args: {SERVICIO: productos}
+    image: tienda-productos:local
+    environment:
+      ENTRADA: "api_productos:app"
+      HABILITAR_DOCS: ${HABILITAR_DOCS:-0}
+      SERVICE_TOKEN: ${SERVICE_TOKEN:?defina SERVICE_TOKEN en .env}
+    ports: ["127.0.0.1:8001:8000"]
+
+  clientes:
+    <<: *comun
+    build:
+      context: .
+      args: {SERVICIO: clientes}
+    image: tienda-clientes:local
+    environment:
+      ENTRADA: "api_clientes:app"
+      HABILITAR_DOCS: ${HABILITAR_DOCS:-0}
+    ports: ["127.0.0.1:8002:8000"]
+
+  pedidos:
+    <<: *comun
+    build:
+      context: .
+      args: {SERVICIO: pedidos}
+    image: tienda-pedidos:local
+    environment:
+      ENTRADA: "api_pedidos:create_app --factory"
+      HABILITAR_DOCS: ${HABILITAR_DOCS:-0}
+      SERVICE_TOKEN: ${SERVICE_TOKEN:?defina SERVICE_TOKEN en .env}
+      PRODUCTOS_URL: http://productos:8000
+      CLIENTES_URL: http://clientes:8000
+    ports: ["127.0.0.1:8003:8000"]
+    # Sin depends_on: pedidos arranca aunque productos o clientes estén caídos (así se prueba la tolerancia a fallos).
+
+networks:
+  interna: {}
