@@ -1,0 +1,11 @@
+$ pytest --cov=servicios
+..................                                                       [100%]
+---------- coverage: platform win32, python 3.14.3-final-0 -----------
+Name                                   Stmts   Miss  Cover
+----------------------------------------------------------
+servicios\clientes\api_clientes.py        58      1    98%
+servicios\pedidos\api_pedidos.py          91      9    90%
+servicios\pedidos\resiliencia.py          53      2    96%
+servicios\productos\api_productos.py      85      1    99%
+----------------------------------------------------------
+TOTAL                                    287     13    95%

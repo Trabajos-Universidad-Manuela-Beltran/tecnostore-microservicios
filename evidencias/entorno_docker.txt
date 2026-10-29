@@ -1,0 +1,8 @@
+$ docker compose ps
+NAME                                IMAGE                    STATUS                   PORTS
+tienda-microservicios-clientes-1    tienda-clientes:local    Up 9 seconds (healthy)   127.0.0.1:8002->8000/tcp
+tienda-microservicios-pedidos-1     tienda-pedidos:local     Up 9 seconds (healthy)   127.0.0.1:8003->8000/tcp
+tienda-microservicios-productos-1   tienda-productos:local   Up 9 seconds (healthy)   127.0.0.1:8001->8000/tcp
+
+$ docker inspect: usuario, sistema de archivos y límites (servicio pedidos)
+Usuario=svc SoloLectura=true CapDrop=[ALL] CPU(nanos)=500000000 Memoria(bytes)=268435456

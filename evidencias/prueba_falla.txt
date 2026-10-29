@@ -1,0 +1,27 @@
+== Estado normal ==
+  POST pedidos/pedidos         -> 201 en    415 ms  crear pedido
+
+== Escenario 1: se DETIENE el microservicio de productos (docker compose stop productos) ==
+  GET  clientes/clientes        -> 200 en    414 ms  consultar clientes | 1 elemento(s)
+  POST clientes/clientes        -> 201 en    389 ms  registrar un cliente
+  GET  pedidos/pedidos         -> 200 en    402 ms  consultar pedidos existentes | 1 elemento(s)
+  GET  pedidos/pedidos/1       -> 200 en    376 ms  consultar un pedido
+  -- se intenta crear pedidos mientras productos está caído (el disyuntor abre tras 3 fallos) --
+  POST pedidos/pedidos         -> 503 en   2931 ms  crear pedido, intento 1 | El servicio de productos no está disponible; intente de nuevo en unos segundos
+  POST pedidos/pedidos         -> 503 en   2882 ms  crear pedido, intento 2 | El servicio de productos no está disponible; intente de nuevo en unos segundos
+  POST pedidos/pedidos         -> 503 en   2891 ms  crear pedido, intento 3 | El servicio de productos no está disponible; intente de nuevo en unos segundos
+  POST pedidos/pedidos         -> 503 en    389 ms  crear pedido, intento 4 | El servicio de productos no está disponible; intente de nuevo en unos segundos
+  POST pedidos/pedidos         -> 503 en    389 ms  crear pedido, intento 5 | El servicio de productos no está disponible; intente de nuevo en unos segundos
+  estado de dependencias visto por pedidos: [{'servicio': 'clientes', 'responde': 'sí', 'disyuntor': 'cerrado'}, {'servicio': 'productos', 'responde': 'no', 'disyuntor': 'abierto'}]
+
+== Recuperación: se REINICIA productos (sus datos en memoria se pierden, se vuelve a cargar el catálogo) ==
+  esperando a que el disyuntor pase a semiabierto (10 s)...
+  POST pedidos/pedidos         -> 201 en    394 ms  crear pedido tras la recuperación
+
+== Escenario 2: se DETIENE el microservicio de clientes (docker compose stop clientes) ==
+  GET  productos/productos       -> 200 en    406 ms  consultar productos | 1 elemento(s)
+  POST productos/productos       -> 201 en    379 ms  registrar un producto
+  GET  pedidos/pedidos         -> 200 en    390 ms  consultar pedidos existentes | 2 elemento(s)
+  POST pedidos/pedidos         -> 503 en   2890 ms  crear pedido (necesita validar al cliente) | El servicio de clientes no está disponible; intente de nuevo en unos segundos
+
+  clientes reiniciado; los tres servicios vuelven a responder a /health.

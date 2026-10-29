@@ -1,0 +1,9 @@
+$ bandit -r servicios
+	No issues identified.
+	Total lines of code: 339
+	Total issues (by severity):
+		Low: 0
+		Medium: 0
+
+$ pip-audit -r requirements.txt
+No known vulnerabilities found

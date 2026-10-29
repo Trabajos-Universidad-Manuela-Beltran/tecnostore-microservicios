@@ -1,0 +1,5 @@
+== Aislamiento: avalancha de consultas al catálogo mientras se consulta a clientes ==
+clientes SIN carga sobre productos             mediana    3.1 ms | p95   19.9 ms | n=40
+clientes CON 24 conexiones saturando productos mediana    3.1 ms | p95   46.2 ms | n=60
+productos bajo la avalancha                    mediana   74.4 ms | p95  108.9 ms | n=1515
+productos atendió 1515 consultas durante la prueba (262 por segundo aprox.)

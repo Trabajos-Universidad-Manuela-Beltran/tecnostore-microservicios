@@ -1,0 +1,48 @@
+== Demostración de las API de TecnoStore (microservicios en Docker) ==
+[OK   ] GET  productos/health -> 200 (499 ms) salud de productos
+        {"servicio":"productos","estado":"ok"}
+[OK   ] GET  clientes/health -> 200 (387 ms) salud de clientes
+        {"servicio":"clientes","estado":"ok"}
+[OK   ] GET  pedidos/health -> 200 (433 ms) salud de pedidos
+        {"servicio":"pedidos","estado":"ok"}
+
+-- Servicio de productos --
+[OK   ] POST productos/productos -> 201 (404 ms) registrar producto
+        {"id":1,"nombre":"Portátil Pro 14","precio_cop":3200000,"stock":5}
+[OK   ] POST productos/productos -> 201 (371 ms) registrar producto
+        {"id":2,"nombre":"Auriculares inalámbricos","precio_cop":249900,"stock":20}
+[OK   ] GET  productos/productos -> 200 (374 ms) consultar catálogo
+        [{"id":1,"nombre":"Portátil Pro 14","precio_cop":3200000,"stock":5},{"id":2,"nombre":"Auriculares inalámbricos","precio_cop":249900,"stock":20}]
+[OK   ] GET  productos/productos/1 -> 200 (413 ms) consultar un producto
+        {"id":1,"nombre":"Portátil Pro 14","precio_cop":3200000,"stock":5}
+
+-- Servicio de clientes --
+[OK   ] POST clientes/clientes -> 201 (417 ms) registrar cliente
+        {"id":1,"nombre":"Ana Pérez","email":"ana.perez@example.com"}
+[OK   ] POST clientes/clientes -> 201 (387 ms) registrar cliente
+        {"id":2,"nombre":"Luis Gómez","email":"luis.gomez@example.com"}
+[OK   ] GET  clientes/clientes/1 -> 200 (386 ms) consultar un cliente
+        {"id":1,"nombre":"Ana Pérez","email":"ana.perez@example.com"}
+
+-- Servicio de pedidos (consulta a clientes y productos por HTTP) --
+[OK   ] POST pedidos/pedidos -> 201 (395 ms) registrar pedido de 1 portátil y 2 auriculares
+        {"id":1,"cliente_id":1,"estado":"confirmado","total_cop":3699800,"creado":"2026-10-29T15:44:59.227753Z","items":[{"producto_id":1,"nombre":"Portátil P…
+[OK   ] GET  pedidos/pedidos/1 -> 200 (395 ms) consultar el estado del pedido
+        {"id":1,"cliente_id":1,"estado":"confirmado","total_cop":3699800,"creado":"2026-10-29T15:44:59.227753Z","items":[{"producto_id":1,"nombre":"Portátil P…
+        total esperado: 3.699.800 COP | total recibido: 3.699.800 COP
+[OK   ] GET  productos/productos/1 -> 200 (368 ms) el stock del portátil bajó de 5 a 4
+        {"id":1,"nombre":"Portátil Pro 14","precio_cop":3200000,"stock":4}
+
+-- Errores controlados --
+[OK   ] POST pedidos/pedidos -> 404 (385 ms) cliente inexistente
+        {"detail":"El cliente no existe"}
+[OK   ] POST pedidos/pedidos -> 409 (391 ms) existencias insuficientes
+        {"detail":"Existencias insuficientes del producto 1"}
+[OK   ] POST pedidos/pedidos -> 422 (386 ms) entrada inválida (cantidad 0)
+        {"detail":[{"type":"greater_than","loc":["body","items",0,"cantidad"],"msg":"Input should be greater than 0","input":0,"ctx":{"gt":0}}]}
+[OK   ] POST clientes/clientes -> 409 (391 ms) correo duplicado
+        {"detail":"El correo ya está registrado"}
+[OK   ] POST productos/productos/1/reservar -> 401 (382 ms) reservar stock sin token de servicio
+        {"detail":"Token de servicio inválido"}
+[OK   ] POST productos/productos/2/reservar -> 200 (372 ms) reservar stock con el token de servicio
+        {"id":2,"nombre":"Auriculares inalámbricos","precio_cop":249900,"stock":17}
